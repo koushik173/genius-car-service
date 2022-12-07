@@ -1,26 +1,31 @@
 import React, { useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import { useCreateUserWithEmailAndPassword, useUpdateProfile } from 'react-firebase-hooks/auth';
 import auth from "../../../firebase.init"
 import SocialLogin from '../SocialLogin/SocialLogin';
+import Loading from '../../Share/Loading/Loading';
 
 const Register = () => {
-    const [createUserWithEmailAndPassword ,user,error] = useCreateUserWithEmailAndPassword(auth);
+    const [createUserWithEmailAndPassword ,user,error] = useCreateUserWithEmailAndPassword(auth,{sendEmailVerification: true});
+    const [updateProfile, updating, profileError] = useUpdateProfile(auth);
     const [agree, setAgree] = useState(false)
-
-    const handleSubmit=event=>{
+    const navigate = useNavigate();
+    
+    const handleSubmit= async(event)=>{
         event.preventDefault();
         const password = event.target.formBasicPassword.value;
         const email = event.target.formBasicEmail.value;
-        // const name = event.target.formBasicName.value;
-        createUserWithEmailAndPassword(email, password);
+        const name = event.target.formBasicName.value;
+        await createUserWithEmailAndPassword(email, password);
+        await updateProfile({ displayName: name });
         alert("SuccessFully Registered");
+        navigate('/login');
     }
-    const navigate = useNavigate();
-    if(user){
-        navigate('/home');
+    if(updating){
+        return <Loading></Loading>
     }
+
 
     return (
         <div  className='container w-50 mx-auto mt-4'>
@@ -39,9 +44,9 @@ const Register = () => {
                 <Form.Label>Password</Form.Label>
                 <Form.Control type="password" placeholder="Password"  required/>
             </Form.Group>
-            <div class="form-check">
+            <div className="form-check">
                 <input onClick={()=> setAgree(!agree)} type="checkbox" className="form-check-input" id="exampleCheck1"/>
-                <label className="form-check-label mb-2" for="exampleCheck1"><p className={`ps-2 ${agree ? '':'text-danger'}`}>Accept Car Genius Terms And Condition</p></label>
+                <label className="form-check-label mb-2" htmlFor="exampleCheck1"><p className={`ps-2 ${agree ? '':'text-danger'}`}>Accept Car Genius Terms And Condition</p></label>
             </div>
             <Button 
                 disabled={!agree}

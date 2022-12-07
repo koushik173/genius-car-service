@@ -14,6 +14,7 @@ const Header = () => {
         alert('You are sign out');
         navigate("/home");
     }
+  
     return (
         <>
         <Navbar collapseOnSelect sticky='top' expand="lg" bg="primary" variant="dark">

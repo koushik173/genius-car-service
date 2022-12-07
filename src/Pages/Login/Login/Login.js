@@ -2,14 +2,22 @@ import React, { useRef } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import { useSendPasswordResetEmail, useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import auth from '../../../firebase.init';
+import Loading from '../../Share/Loading/Loading';
 import SocialLogin from '../SocialLogin/SocialLogin';
-
 
 const Login = () => {
     const emailRef = useRef('');
     const passwordRef = useRef('');
-    const [signInWithEmailAndPassword,user,error] =useSignInWithEmailAndPassword(auth)
+    const [
+        signInWithEmailAndPassword,
+        user,
+        loading,
+        error,
+      ] = useSignInWithEmailAndPassword(auth);
+
     const [sendPasswordResetEmail, sending] = useSendPasswordResetEmail(auth);
 
     const location = useLocation();
@@ -23,10 +31,20 @@ const Login = () => {
         const email = emailRef.current.value;
         const password = passwordRef.current.value;
         signInWithEmailAndPassword(email,password);
+        
     }
-    const forgetPassword=async()=>{
-        await sendPasswordResetEmail(emailRef.current.value);
-        alert('Sent email');
+    const forgetPassword=()=>{
+        const email = emailRef.current.value;
+        if(email){
+            sendPasswordResetEmail(email);
+            toast('Sent email');
+        }
+        else{
+            toast('Please Enter your Email',{autoClose: 500})
+        }
+    }
+    if(loading || sending){
+        return <Loading></Loading>
     }
     
     return (
@@ -47,12 +65,11 @@ const Login = () => {
                     Log In
                 </Button>
             </Form>
-            {
-                error && <span>{error.message}</span>
-            }
-            <br /><p> Forget Password ? <Link onClick={forgetPassword} className='text-primary text-decoration-none'>Reset Password!!</Link></p>
+            <p className='mt-2' style={{color: 'red'}}>{error?.message}</p>
+            <p> Forget Password ? <Link onClick={forgetPassword} className='text-primary text-decoration-none'>Reset Password!!</Link></p>
             <p> New to Genius car ? <Link to="/register" className='text-primary text-decoration-none'>Please register!!</Link></p>
             <SocialLogin></SocialLogin>
+            <ToastContainer />
         </div>
     );
 };

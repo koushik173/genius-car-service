@@ -5,16 +5,20 @@ import gtlogo from '../../../images/gtlogo.png'
 import { useSignInWithGithub, useSignInWithGoogle } from 'react-firebase-hooks/auth';
 import auth from '../../../firebase.init';
 import { useLocation, useNavigate } from 'react-router-dom';
+import Loading from '../../Share/Loading/Loading';
 
 const SocialLogin = () => {
-    const [signInWithGoogle,user, error] = useSignInWithGoogle(auth);
-    const [signInWithGithub, user1, error1] = useSignInWithGithub(auth);
+    const [signInWithGoogle,user,loading, error,] = useSignInWithGoogle(auth);
+    const [signInWithGithub, user1,loading1, error1,] = useSignInWithGithub(auth);
 
     const location = useLocation();
     const from = location.state?.from?.pathname || '/';
     const navigate = useNavigate();
     if(user || user1){
         navigate(from,{replace: true});
+    }
+    if(loading1||loading){
+        return <Loading></Loading>
     }
     return (
         <div>
